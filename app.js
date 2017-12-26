@@ -3,7 +3,11 @@ var express = require('express'),
     http = require('http'),
     fs = require('fs'),
     path = require('path'),
-    Sequelize = require('sequelize');
+    Sequelize = require('sequelize'),
+    webpack = require('webpack'),
+    webpackDevMiddleware = require('webpack-dev-middleware'),
+    webpackHotMiddleware = require('webpack-hot-middleware'),
+    config = require('./webpack.config');
 
 var isDBExist = fs.existsSync(path.join(__dirname, 'books.sqlite'));
 
@@ -250,6 +254,10 @@ app.route('/api/books/:book_id')
             res.json(book);
         });
     });
+
+var compiler = webpack(config)
+app.use(webpackDevMiddleware(compiler, { noInfo: true, publicPath: config.output.publicPath }))
+app.use(webpackHotMiddleware(compiler))
 
 app.get('*', function (req, res) {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
